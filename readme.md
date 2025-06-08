@@ -62,13 +62,14 @@ selanjutnya kita melakukan pengecekan bivariate analysist dan correlation matrix
 
 ## Data Preparation
 data preparation digunakan agar feature dapat diproses dengan baik oleh algoritma machine learning sehingga didapatkan model yang baik. tahap yang dilakukan adalah :
-1. Encoding feature kategorikal, merubah features categorical menjadi nominal. agar data kategorikal dapat diproses oleh machine learning karena kolomnya sudah berubah menjadi tipe data nominal. Machine learning hanya bisa memproses data numerik sehingga kita harus merubah data kategorikal terlebih dahulu.
-2. Train Test Split, membagi data menjadi train dan test dengan perbandingan 90 : 10. untuk membantu membagi data menjadi dua bagian   yaitu 90 % data training dan 10 % data testing. Data training digunakan untuk melatih model / modeling dan data testing untuk mengetes hasil dari modeling.
-3. Standarisasi, merubah standarisasi dari feature numerical agar memiliki persebaran data yang rata. Persebaran data yang merata dibutuhkan agar nilai inputan tidak terlalu dominan ke salah satu sisi. Standarisasi menggunakan StandardScaler() agar mendapatkan nilai mean = 0 dan standard deviasi = 1
+1. Penanganan Outlier, penanganan outlier menggunakan metode IQR untuk melakukan pengecekan outlier yang kemudian data yang terindikasi outlier akan di hapus. dari cara tersebut jumlah data yang awalnya 1338 menjadi 1193. Metode IQR digunakan untuk penanganan karena dapat mengidentifikasi outlier yang berada di luar Q1 dan Q3. Nilai apa pun yang berada di luar batas ini dianggap sebagai outlier. Hal pertama yang perlu dilakukan adalah membuat batas bawah dan batas atas. Untuk membuat batas bawah, kurangi Q1 dengan 1,5 * IQR. Kemudian, untuk membuat batas atas, tambahkan 1.5 * IQR dengan Q3.
+2. Encoding feature kategorikal, merubah features categorical menjadi nominal. agar data kategorikal dapat diproses oleh machine learning karena kolomnya sudah berubah menjadi tipe data nominal. Machine learning hanya bisa memproses data numerik sehingga kita harus merubah data kategorikal terlebih dahulu.
+3. Train Test Split, membagi data menjadi train dan test dengan perbandingan 90 : 10. untuk membantu membagi data menjadi dua bagian   yaitu 90 % data training dan 10 % data testing. Data training digunakan untuk melatih model / modeling dan data testing untuk mengetes hasil dari modeling.
+4. Standarisasi, merubah standarisasi dari feature numerical agar memiliki persebaran data yang rata. Persebaran data yang merata dibutuhkan agar nilai inputan tidak terlalu dominan ke salah satu sisi. Standarisasi menggunakan StandardScaler() agar mendapatkan nilai mean = 0 dan standard deviasi = 1
 
 ## Modeling
 modeling adalah bagian penting untuk membuat machine learning. Pada project ini kita menggunakan beberapa cara modeling yaitu:
-1. KNN, menggunakan ‘kesamaan fitur’ untuk memprediksi nilai dari setiap data yang baru. Dengan kata lain, setiap data baru diberi nilai berdasarkan seberapa mirip titik tersebut dalam set pelatihan. **Parameter yang diubah adalah:**
+1. KNN, menggunakan ‘kesamaan fitur’ untuk memprediksi nilai dari setiap data yang baru. Dengan kata lain, setiap data baru diberi nilai berdasarkan seberapa mirip titik tersebut dalam set pelatihan. Pemilihan nilai k sangat penting dan berpengaruh terhadap performa model. Jika kita memilih k yang terlalu rendah, maka akan menghasilkan model yang overfit dan hasil prediksinya memiliki varians tinggi. Jika kita memilih k terlalu tinggi, maka model yang dihasilkan akan underfit dan prediksinya memiliki bias yang tinggi. **Parameter yang diubah adalah:**
     - n_neighbors = 10 (mengatur jumlah tetangga terdekat)
 **kelebihan:**
     - Sederhana & Mudah Dipahami
@@ -79,7 +80,7 @@ modeling adalah bagian penting untuk membuat machine learning. Pada project ini 
     - Sangat Tergantung pada Skala Fitur
     - Sensitif terhadap Outlier dan Noise
     - Tidak cocok untuk dataset besar
-2. Random Forest, model machine learning yang termasuk ke dalam kategori ensemble (group) learning. **Parameter yang diubah adalah:**
+2. Random Forest, model machine learning yang termasuk ke dalam kategori ensemble (group) learning. Ide dibalik model ensemble adalah sekelompok model yang bekerja bersama menyelesaikan masalah. Bagging atau bootstrap aggregating adalah teknik yang melatih model dengan sampel random. Dalam teknik bagging, sejumlah model dilatih dengan proses sampling dengan penggantian. pada kasus regresi random forest, prediksi akhir adalah rata-rata prediksi seluruh pohon dalam model ensemble. **Parameter yang diubah adalah:**
     - n_estimators = 50 (mengatur banyaknya jumlah pohon keputusan dalam random forest)
     - max_depth = 25 (mengatur kedalaman maksimum setiap pohon)
     - random_state = 55 (mengatur seed untuk pengacakan agar hasilnya reproducible)
@@ -95,7 +96,7 @@ modeling adalah bagian penting untuk membuat machine learning. Pada project ini 
     - Training dan prediksi bisa lebih lambat daripada model sederhana
     - Ukuran model besar
 
-3. Boosting Algorithm, algoritma ini bertujuan untuk meningkatkan performa atau akurasi prediksi. Caranya adalah dengan menggabungkan beberapa model sederhana dan dianggap lemah (weak learners) sehingga membentuk suatu model yang kuat (strong ensemble learner). **Parameter yang diubah adalah:**
+3. Boosting Algorithm, algoritma ini bertujuan untuk meningkatkan performa atau akurasi prediksi. Caranya adalah dengan menggabungkan beberapa model sederhana dan dianggap lemah (weak learners) sehingga membentuk suatu model yang kuat (strong ensemble learner). Algoritma boosting sangat powerfull. Cara penggunaannya menggunakan algoritma boosting atau kombinasi beberapa algoritma boosting dalam modelnya. Meskipun demikian, hal ini tetap bergantung pada kasus per kasus, ruang lingkup masalah, dan dataset yang digunakan. **Parameter yang diubah adalah:**
     - learning_rate = 0.02 (mengontrol kontribusi masing-masing estimator terhadap prediksi akhir)
     - random_state = 55 (seed untuk pengacakan agar hasilnya konsisten saat dijalankan berulang)
 **kelebihan:**
@@ -111,8 +112,9 @@ modeling adalah bagian penting untuk membuat machine learning. Pada project ini 
 Pelatihan dilakukan dilakukan pada ketiga model. namun model yang dipilih adalah **Random Forest** karena modul memiliki nilai error paling kecil dibandingkan dengan model lainnya. Hal ini bisa karena random forest terkenal dengan robust dan tahan dengan overfitting sehingga dapat memberikan hasil yang memuaskan.
 
 ## Evaluation
-evaluasi dilakukan untuk memberikan informasi mengenai hasil performa setiap model setelah dilakukan pelatihan. hasil dari pelatihan diukur errornya menggunakan **MSE** (Mean Squared Error) adalah salah satu metrik evaluasi yang digunakan untuk mengukur seberapa akurat model regresi dalam memprediksi nilai. MSE menghitung rata-rata dari kuadrat selisih antara nilai sebenarnya (aktual) dan nilai prediksi dari model. Hasilnya adalah sebagai berikut:
+evaluasi dilakukan untuk memberikan informasi mengenai hasil performa setiap model setelah dilakukan pelatihan. hasil dari pelatihan diukur errornya menggunakan **MSE (Mean Squared Error)** adalah salah satu metrik evaluasi yang digunakan untuk mengukur seberapa akurat model regresi dalam memprediksi nilai. MSE menghitung rata-rata dari kuadrat selisih antara nilai sebenarnya (aktual) dan nilai prediksi dari model. Hasilnya adalah sebagai berikut:
 ![Result Training](result.png)
+Pada gambar diatas ditampilkan mengenai nilai pengecekan error hasil dari pelatihan dan pengujian ketiga model. dari diagram tersebut dapat dilihat bahwa model KNN memiliki nilai error pada train sebesar 20554 dan test sebesar 19339. model Random Forest memiliki nilai error pada train sebesar 3350 dan test sebesar 15563. model Boosting memiliki nilai error pada train sebesar 19147 dan test sebesar 16455. dari diagram tersebut kita dapat melihat model random forest unggul pada training dan testing.
 Cara Kerja MSE:
 1. Model membuat prediksi untuk setiap data.
 2. Hitung selisih antara nilai aktual dan nilai prediksi.
